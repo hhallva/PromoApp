@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace WpfApp
 {
@@ -16,6 +17,37 @@ namespace WpfApp
             _inactivePromocodes.Add("PROMO123");
             InitializeComponent();
         }
+
+        private void UpdateLists()
+        {
+            ActivePromocodeListBox.ItemsSource = null;
+            ActivePromocodeListBox.ItemsSource = _activePromocodes;
+            ActivePromocodeCountLabel.Text = _activePromocodes.Count.ToString();
+        }
+        private void DeleteActivePromocodeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is string code)
+            {
+                if (MessageBox.Show($"Удалить активированный промокод {code}?", "Подтверждение", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    _activePromocodes.Remove(code);
+                    UpdateLists();
+                }
+            }
+        }
+
+        private void DeleteInactivePromocodeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is string code)
+            {
+                if (MessageBox.Show($"Удалить неактивированный промокод {code}?", "Подтверждение", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    _inactivePromocodes.Remove(code);
+                    UpdateLists();
+                }
+            }
+        }
+
         private void ActivatePromocodeButton_Click(object sender, RoutedEventArgs e)
         {
             string code = ActivationPromocodeTextBox.Text.Trim();
@@ -35,6 +67,7 @@ namespace WpfApp
             {
                 _inactivePromocodes.Remove(code);
                 _activePromocodes.Add(code);
+                UpdateLists();
                 ActivationResultListBox.Items.Add($"Промокод {code} успешно активирован!");
             }
             else
