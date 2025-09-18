@@ -17,15 +17,24 @@
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                        <TextBox x:Name="ActivationPromocodeTextBox" Width="200" Height="30" MaxLength="8" FontSize="16"/>
-                        <Button Content="Активировать" Width="150" Height="30" Margin="10,0,0,0" Background="#4CAF50" Foreground="White" Click="ActivatePromocodeButton_Click"/>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBox x:Name="ActivationPromocodeTextBox"
+                                 Width="200"
+                                 Height="30"
+                                 FontSize="14"/>
+                        <Button Content="Активировать"
+                                Background="#4CAF50"
+                                Foreground="White"
+                                Margin="10,0,0,0"
+                                Click="ActivatePromocodeButton_Click"/>
                     </StackPanel>
 
-                    <ListBox x:Name="ActivationResultListBox" Grid.Row="1" FontSize="16"/>
+                    <TextBlock Grid.Row="1" Text="Результат:" FontWeight="Bold"/>
+                    <ListBox x:Name="ActivationResultListBox" Grid.Row="2"/>
                 </Grid>
             </TabItem>
 
@@ -36,19 +45,29 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <ListBox x:Name="ActivePromocodeListBox" Grid.Row="0" FontSize="16">
+                    <ListBox x:Name="ActivePromocodeListBox" FontSize="14">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <DockPanel LastChildFill="True" Margin="0,2">
-                                    <Button Content="Удалить" Width="70" DockPanel.Dock="Right" Margin="5,0,0,0"
-                                    Background="#f44336" Foreground="White" Click="DeleteActivePromocodeButton_Click"/>
-                                    <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
+                                <DockPanel Margin="0,2">
+                                    <Button Content="Удалить"
+                                            DockPanel.Dock="Right"
+                                            Background="#f44336"
+                                            Foreground="White"
+                                            Click="DeleteActivePromocodeButton_Click"/>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Code}" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding StartDate, StringFormat='Начало: {0:d}'}"
+                                                   FontSize="12" Foreground="Gray"/>
+                                        <TextBlock Text="{Binding EndDate, StringFormat='Окончание: {0:d}'}"
+                                                   FontSize="12" Foreground="Gray"/>
+                                    </StackPanel>
                                 </DockPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                    <StackPanel Grid.Row="1" Orientation="Horizontal"
+                                HorizontalAlignment="Right" Margin="0,10,0,0">
                         <TextBlock Text="Количество: " FontWeight="Bold"/>
                         <TextBlock x:Name="ActivePromocodeCountLabel" Text="0"/>
                     </StackPanel>
@@ -64,24 +83,49 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,10">
-                        <TextBox x:Name="NewPromocodeTextBox" Width="200" Height="30" MaxLength="8" FontSize="16"/>
-                        <Button Content="Добавить" Width="100" Height="30" Margin="10,0,0,0" Background="#2196F3" Foreground="White" Click="AddNewPromocodeButton_Click"/>
+                    <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,10">
+                        <TextBox x:Name="NewPromocodeTextBox"
+                                 Width="200"
+                                 Height="30"
+                                 MaxLength="10"
+                                 FontSize="14"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <DatePicker x:Name="StartDatePicker" Width="150"/>
+                            <DatePicker x:Name="EndDatePicker" Width="150" Margin="10,0,0,0"/>
+                            <CheckBox x:Name="UnlimitedCheckBox" Content="Бессрочный"
+                                      VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </StackPanel>
+
+                        <Button Content="Добавить промокод"
+                                Background="#2196F3"
+                                Foreground="White"
+                                Click="AddNewPromocodeButton_Click"/>
                     </StackPanel>
 
-                    <ListBox x:Name="InactivePromocodeListBox" Grid.Row="1" FontSize="16">
+                    <ListBox x:Name="InactivePromocodeListBox" Grid.Row="1" FontSize="14">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <DockPanel LastChildFill="True" Margin="0,2">
-                                    <Button Content="Удалить" Width="70" DockPanel.Dock="Right" Margin="5,0,0,0"
-                            Background="#f44336" Foreground="White" Click="DeleteInactivePromocodeButton_Click"/>
-                                    <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
+                                <DockPanel Margin="0,2">
+                                    <Button Content="Удалить"
+                                            DockPanel.Dock="Right"
+                                            Background="#f44336"
+                                            Foreground="White"
+                                            Click="DeleteInactivePromocodeButton_Click"/>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Code}" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding StartDate, StringFormat='Начало: {0:d}'}"
+                                                   FontSize="12" Foreground="Gray"/>
+                                        <TextBlock Text="{Binding EndDate, StringFormat='Окончание: {0:d}'}"
+                                                   FontSize="12" Foreground="Gray"/>
+                                    </StackPanel>
                                 </DockPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                    <StackPanel Grid.Row="2" Orientation="Horizontal"
+                                HorizontalAlignment="Right" Margin="0,10,0,0">
                         <TextBlock Text="Количество: " FontWeight="Bold"/>
                         <TextBlock x:Name="InactivePromocodeCountLabel" Text="0"/>
                     </StackPanel>

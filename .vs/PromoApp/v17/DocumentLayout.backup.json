@@ -9,6 +9,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{991722EC-4270-4E2A-A5A1-4B1785EACD6B}|WpfApp\\WpfApp.csproj|c:\\temp\\ispp21\\promoapp\\wpfapp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{991722EC-4270-4E2A-A5A1-4B1785EACD6B}|WpfApp\\WpfApp.csproj|solutionrelative:wpfapp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{991722EC-4270-4E2A-A5A1-4B1785EACD6B}|WpfApp\\WpfApp.csproj|c:\\temp\\ispp21\\promoapp\\wpfapp\\promocode.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{991722EC-4270-4E2A-A5A1-4B1785EACD6B}|WpfApp\\WpfApp.csproj|solutionrelative:wpfapp\\promocode.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,8 +22,25 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Promocode.cs",
+              "DocumentMoniker": "C:\\Temp\\ispp21\\PromoApp\\WpfApp\\Promocode.cs",
+              "RelativeDocumentMoniker": "WpfApp\\Promocode.cs",
+              "ToolTip": "C:\\Temp\\ispp21\\PromoApp\\WpfApp\\Promocode.cs",
+              "RelativeToolTip": "WpfApp\\Promocode.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-18T12:26:24.28Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
@@ -38,9 +59,9 @@
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "C:\\Temp\\ispp21\\PromoApp\\WpfApp\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "WpfApp\\MainWindow.xaml.cs",
-              "ToolTip": "C:\\Temp\\ispp21\\PromoApp\\WpfApp\\MainWindow.xaml.cs",
-              "RelativeToolTip": "WpfApp\\MainWindow.xaml.cs",
-              "ViewState": "AgIAADgAAAAAAAAAAAAmwFMAAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Temp\\ispp21\\PromoApp\\WpfApp\\MainWindow.xaml.cs*",
+              "RelativeToolTip": "WpfApp\\MainWindow.xaml.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-18T11:13:57.837Z",
               "EditorCaption": ""

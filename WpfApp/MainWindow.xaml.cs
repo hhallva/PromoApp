@@ -3,19 +3,34 @@ using System.Windows.Controls;
 
 namespace WpfApp
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+
     public partial class MainWindow : Window
     {
-        private List<string> _activePromocodes = new List<string>();
-        private List<string> _inactivePromocodes = new List<string>();
+        private List<Promocode> _activePromocodes = new();
+        private List<Promocode> _inactivePromocodes = new();
 
         public MainWindow()
         {
-            _activePromocodes.Add("PROMO223");
-            _inactivePromocodes.Add("PROMO123");
             InitializeComponent();
+
+            _inactivePromocodes.Add(new Promocode
+            {
+                Id = 1,
+                Code = "SALE2025",
+                StartDate = DateTime.Now.AddDays(-1),
+                EndDate = DateTime.Now.AddDays(10),
+                IsActive = false
+            });
+
+            _inactivePromocodes.Add(new Promocode
+            {
+                Id = 2,
+                Code = "DISCOUNT",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(30),
+                IsActive = false
+            });
+
             UpdateLists();
         }
 
@@ -29,30 +44,6 @@ namespace WpfApp
             InactivePromocodeListBox.ItemsSource = _inactivePromocodes;
             InactivePromocodeCountLabel.Text = _inactivePromocodes.Count.ToString();
         }
-        private void DeleteActivePromocodeButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.DataContext is string code)
-            {
-                if (MessageBox.Show($"Удалить активированный промокод {code}?", "Подтверждение", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                {
-                    _activePromocodes.Remove(code);
-                    UpdateLists();
-                }
-            }
-        }
-
-        private void DeleteInactivePromocodeButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.DataContext is string code)
-            {
-                if (MessageBox.Show($"Удалить неактивированный промокод {code}?", "Подтверждение", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                {
-                    _inactivePromocodes.Remove(code);
-                    UpdateLists();
-                }
-            }
-        }
-
         private void ActivatePromocodeButton_Click(object sender, RoutedEventArgs e)
         {
             string code = ActivationPromocodeTextBox.Text.Trim();
@@ -60,29 +51,46 @@ namespace WpfApp
 
             if (string.IsNullOrEmpty(code))
             {
-                ActivationResultListBox.Items.Add("Введите промокод для активации.");
+                ActivationResultListBox.Items.Add("Введите промокод.");
                 return;
             }
 
-            if (_activePromocodes.Contains(code))
+            var promo = _inactivePromocodes.Find(p => p.Code == code);
+
+            if (promo == null)
             {
-                ActivationResultListBox.Items.Add($"Промокод {code} уже активирован.");
-            }
-            else if (_inactivePromocodes.Contains(code))
-            {
-                _inactivePromocodes.Remove(code);
-                _activePromocodes.Add(code);
-                UpdateLists();
-                ActivationResultListBox.Items.Add($"Промокод {code} успешно активирован!");
-            }
-            else
-            {
-                ActivationResultListBox.Items.Add($"Промокод {code} не найден в списке неактивированных.");
+                ActivationResultListBox.Items.Add("Промокод не найден.");
+                return;
             }
 
+            if (promo.StartDate > DateTime.Now)
+            {
+                ActivationResultListBox.Items.Add($"Промокод {code} ещё не доступен. Дата начала: {promo.StartDate:d}");
+                return;
+            }
+
+            if (promo.EndDate < DateTime.Now)
+            {
+                ActivationResultListBox.Items.Add($"Промокод {code} просрочен. Дата окончания: {promo.EndDate:d}");
+                return;
+            }
+
+            _inactivePromocodes.Remove(promo);
+            promo.IsActive = true;
+            _activePromocodes.Add(promo);
+
+            UpdateLists();
+            ActivationResultListBox.Items.Add($"Промокод {code} успешно активирован!");
             ActivationPromocodeTextBox.Clear();
         }
-
+        private void DeleteInactivePromocodeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is Promocode promo)
+            {
+                _inactivePromocodes.Remove(promo);
+                UpdateLists();
+            }
+        }
         private void AddNewPromocodeButton_Click(object sender, RoutedEventArgs e)
         {
             string newCode = NewPromocodeTextBox.Text.Trim();
@@ -93,15 +101,48 @@ namespace WpfApp
                 return;
             }
 
-            if (_inactivePromocodes.Contains(newCode) || _activePromocodes.Contains(newCode))
+            if (_inactivePromocodes.Exists(p => p.Code == newCode) ||
+                _activePromocodes.Exists(p => p.Code == newCode))
             {
-                MessageBox.Show("Промокод уже существует!");
+                MessageBox.Show("Такой промокод уже существует!");
                 return;
             }
 
-            _inactivePromocodes.Add(newCode);
+            if (!StartDatePicker.SelectedDate.HasValue)
+            {
+                MessageBox.Show("Укажите дату начала!");
+                return;
+            }
+
+            DateTime start = StartDatePicker.SelectedDate.Value;
+            DateTime end = UnlimitedCheckBox.IsChecked == true
+                ? DateTime.MaxValue
+                : EndDatePicker.SelectedDate ?? start.AddYears(1);
+
+            var promo = new Promocode
+            {
+                Id = _inactivePromocodes.Count + _activePromocodes.Count + 1,
+                Code = newCode,
+                StartDate = start,
+                EndDate = end,
+                IsActive = false
+            };
+
+            _inactivePromocodes.Add(promo);
             UpdateLists();
+
             NewPromocodeTextBox.Clear();
+            StartDatePicker.SelectedDate = null;
+            EndDatePicker.SelectedDate = null;
+            UnlimitedCheckBox.IsChecked = false;
+        }
+        private void DeleteActivePromocodeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is Promocode promo)
+            {
+                _activePromocodes.Remove(promo);
+                UpdateLists();
+            }
         }
     }
 }
