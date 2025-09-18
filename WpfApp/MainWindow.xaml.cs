@@ -16,6 +16,7 @@ namespace WpfApp
             _activePromocodes.Add("PROMO223");
             _inactivePromocodes.Add("PROMO123");
             InitializeComponent();
+            UpdateLists();
         }
 
         private void UpdateLists()
@@ -23,6 +24,10 @@ namespace WpfApp
             ActivePromocodeListBox.ItemsSource = null;
             ActivePromocodeListBox.ItemsSource = _activePromocodes;
             ActivePromocodeCountLabel.Text = _activePromocodes.Count.ToString();
+
+            InactivePromocodeListBox.ItemsSource = null;
+            InactivePromocodeListBox.ItemsSource = _inactivePromocodes;
+            InactivePromocodeCountLabel.Text = _inactivePromocodes.Count.ToString();
         }
         private void DeleteActivePromocodeButton_Click(object sender, RoutedEventArgs e)
         {
@@ -76,6 +81,27 @@ namespace WpfApp
             }
 
             ActivationPromocodeTextBox.Clear();
+        }
+
+        private void AddNewPromocodeButton_Click(object sender, RoutedEventArgs e)
+        {
+            string newCode = NewPromocodeTextBox.Text.Trim();
+
+            if (string.IsNullOrEmpty(newCode))
+            {
+                MessageBox.Show("Введите промокод!");
+                return;
+            }
+
+            if (_inactivePromocodes.Contains(newCode) || _activePromocodes.Contains(newCode))
+            {
+                MessageBox.Show("Промокод уже существует!");
+                return;
+            }
+
+            _inactivePromocodes.Add(newCode);
+            UpdateLists();
+            NewPromocodeTextBox.Clear();
         }
     }
 }
