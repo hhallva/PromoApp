@@ -1,103 +1,119 @@
 ﻿using DataLayer.Context;
+using DataLayer.DTOs;
 using DataLayer.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/promocodes")]
     [ApiController]
-    public class PromocodesController : ControllerBase
+    public class PromocodesController(AppDbContext context) : ControllerBase
     {
-        private readonly AppDbContext _context;
-
-        public PromocodesController(AppDbContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/Promocodes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Promocode>>> GetPromocodes()
         {
-            return await _context.Promocodes.ToListAsync();
+            var promocodes = await context.Promocodes.ToListAsync();
+
+            if (!promocodes.Any())
+                return NotFound(new Response("Promocodes not found", StatusCodes.Status404NotFound));
+            return promocodes;
         }
 
-        // GET: api/Promocodes/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Promocode>> GetPromocode(int id)
+        [HttpGet("{code}")]
+        public async Task<ActionResult<Promocode>> GetPromocode(string code)
         {
-            var promocode = await _context.Promocodes.FindAsync(id);
+            var promocode = await context.Promocodes.FindAsync(code);
 
             if (promocode == null)
-            {
-                return NotFound();
-            }
+                return NotFound(new Response("Promocode not found", StatusCodes.Status404NotFound));
 
             return promocode;
         }
 
-        // PUT: api/Promocodes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPromocode(int id, Promocode promocode)
-        {
-            if (id != promocode.Id)
-            {
-                return BadRequest();
-            }
 
-            _context.Entry(promocode).State = EntityState.Modified;
+        [HttpPut("{code}/activate")]
+        public async Task<IActionResult> ActivatePromocode(string code)
+        {
+            var promocode = await context.Promocodes
+                .FirstOrDefaultAsync(p => p.Code == code);
+
+            if (promocode == null)
+                return NotFound(new Response("Promocode not found", StatusCodes.Status404NotFound));
+            if (!promocode.IsActive)
+                return Ok(new Response("The promocodeDto has already been used (deactivated).", StatusCodes.Status200OK));
+            if (promocode.StartDate.HasValue && DateTime.UtcNow < promocode.StartDate.Value)
+                return BadRequest(new Response($"Promocode is not active yet. It will be available from {promocode.StartDate.Value:yyyy-MM-dd HH:mm:ss} UTC.",StatusCodes.Status400BadRequest));
+            if (promocode.EndDate.HasValue && DateTime.UtcNow > promocode.EndDate.Value)
+                return BadRequest(new Response($"Promocode has expired. It was valid until {promocode.EndDate.Value:yyyy-MM-dd HH:mm:ss} UTC.", StatusCodes.Status400BadRequest));
+
+            promocode.IsActive = false;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
-                if (!PromocodeExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(500 ,new Response("Internal server error. Please try again later.", 500));
             }
 
             return NoContent();
         }
 
-        // POST: api/Promocodes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Promocode>> PostPromocode(Promocode promocode)
+        public async Task<ActionResult<Promocode>> PostPromocode(PostPromocodeDto promocodeDto)
         {
-            _context.Promocodes.Add(promocode);
-            await _context.SaveChangesAsync();
+            if (string.IsNullOrWhiteSpace(promocodeDto.Code))
+                return BadRequest(new Response("The promocode cannot be empty.", StatusCodes.Status400BadRequest));
 
-            return CreatedAtAction("GetPromocode", new { id = promocode.Id }, promocode);
-        }
-
-        // DELETE: api/Promocodes/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePromocode(int id)
-        {
-            var promocode = await _context.Promocodes.FindAsync(id);
-            if (promocode == null)
+            var promocode = new Promocode
             {
-                return NotFound();
+                Code = promocodeDto.Code,
+                StartDate = promocodeDto.StartDate,
+                EndDate = promocodeDto.EndDate,
+            };
+
+            context.Promocodes.Add(promocode);
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException is SqlException sqlEx && (sqlEx.Number == 2601 || sqlEx.Number == 2627))
+                    return Conflict(new Response("A promocode with this code already exists.",StatusCodes.Status409Conflict));
+                return BadRequest(new Response("Invalid data provided. Please check your input.", StatusCodes.Status400BadRequest));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response("Internal server error. Please try again later.", StatusCodes.Status500InternalServerError));
             }
 
-            _context.Promocodes.Remove(promocode);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return CreatedAtAction("GetPromocode", new { code = promocodeDto.Code }, promocodeDto);
         }
 
-        private bool PromocodeExists(int id)
+        [HttpDelete("{code}")]
+        public async Task<IActionResult> DeletePromocode(string code)
         {
-            return _context.Promocodes.Any(e => e.Id == id);
+            var promocode = await context.Promocodes.FirstOrDefaultAsync(p => p.Code == code);
+            if (promocode == null)
+                return NotFound(new Response("Promocode not found", StatusCodes.Status404NotFound));
+
+            context.Promocodes.Remove(promocode);
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, new Response("Internal server error. Please try again later.", StatusCodes.Status500InternalServerError));
+            }
+
+            return NoContent();
         }
     }
 }
