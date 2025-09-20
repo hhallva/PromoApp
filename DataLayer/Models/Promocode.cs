@@ -2,8 +2,6 @@
 
 public partial class Promocode
 {
-    public int Id { get; set; }
-
     public string Code { get; set; } = null!;
 
     public DateTime? StartDate { get; set; }
