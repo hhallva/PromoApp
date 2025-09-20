@@ -1,33 +1,24 @@
-﻿using DataLayer.Context;
-using DataLayer.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using DataLayer.Context;
+using DataLayer.Models;
 
 namespace WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/promocodes")]
     [ApiController]
-    public class PromocodesController : ControllerBase
+    public class PromocodesController(AppDbContext context) : ControllerBase
     {
-        private readonly AppDbContext _context;
-
-        public PromocodesController(AppDbContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/Promocodes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Promocode>>> GetPromocodes()
         {
-            return await _context.Promocodes.ToListAsync();
+            return await context.Promocodes.ToListAsync();
         }
 
-        // GET: api/Promocodes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Promocode>> GetPromocode(int id)
+        public async Task<ActionResult<Promocode>> GetPromocode(string id)
         {
-            var promocode = await _context.Promocodes.FindAsync(id);
+            var promocode = await context.Promocodes.FindAsync(id);
 
             if (promocode == null)
             {
@@ -37,21 +28,19 @@ namespace WebApi.Controllers
             return promocode;
         }
 
-        // PUT: api/Promocodes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPromocode(int id, Promocode promocode)
+        public async Task<IActionResult> PutPromocode(string id, Promocode promocode)
         {
-            if (id != promocode.Id)
+            if (id != promocode.Code)
             {
                 return BadRequest();
             }
 
-            _context.Entry(promocode).State = EntityState.Modified;
+            context.Entry(promocode).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -68,36 +57,47 @@ namespace WebApi.Controllers
             return NoContent();
         }
 
-        // POST: api/Promocodes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Promocode>> PostPromocode(Promocode promocode)
         {
-            _context.Promocodes.Add(promocode);
-            await _context.SaveChangesAsync();
+            context.Promocodes.Add(promocode);
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (PromocodeExists(promocode.Code))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
-            return CreatedAtAction("GetPromocode", new { id = promocode.Id }, promocode);
+            return CreatedAtAction("GetPromocode", new { id = promocode.Code }, promocode);
         }
 
-        // DELETE: api/Promocodes/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePromocode(int id)
+        public async Task<IActionResult> DeletePromocode(string id)
         {
-            var promocode = await _context.Promocodes.FindAsync(id);
+            var promocode = await context.Promocodes.FindAsync(id);
             if (promocode == null)
             {
                 return NotFound();
             }
 
-            _context.Promocodes.Remove(promocode);
-            await _context.SaveChangesAsync();
+            context.Promocodes.Remove(promocode);
+            await context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool PromocodeExists(int id)
+        private bool PromocodeExists(string id)
         {
-            return _context.Promocodes.Any(e => e.Id == id);
+            return context.Promocodes.Any(e => e.Code == id);
         }
     }
 }
