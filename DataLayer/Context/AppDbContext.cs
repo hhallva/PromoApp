@@ -23,6 +23,8 @@ public partial class AppDbContext : DbContext
     {
         modelBuilder.Entity<Promocode>(entity =>
         {
+            entity.HasKey(e => e.Code);
+
             entity.ToTable("Promocode");
 
             entity.Property(e => e.Code)
