@@ -73,6 +73,7 @@ namespace WebApi.Controllers
                 Code = promocodeDto.Code,
                 StartDate = promocodeDto.StartDate,
                 EndDate = promocodeDto.EndDate,
+                IsActive = true
             };
 
             context.Promocodes.Add(promocode);
@@ -92,15 +93,16 @@ namespace WebApi.Controllers
                 return StatusCode(500, new Response("Internal server error. Please try again later.", StatusCodes.Status500InternalServerError));
             }
 
-            return CreatedAtAction("GetPromocode", new { code = promocodeDto.Code }, promocodeDto);
+            return CreatedAtAction("GetPromocode", new { code = promocode.Code }, promocode);
         }
 
         [HttpDelete("{code}")]
         public async Task<IActionResult> DeletePromocode(string code)
         {
             var promocode = await context.Promocodes.FirstOrDefaultAsync(p => p.Code == code);
+
             if (promocode == null)
-                return NotFound(new Response("Promocode not found", StatusCodes.Status404NotFound));
+                return NoContent();
 
             context.Promocodes.Remove(promocode);
 
