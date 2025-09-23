@@ -152,10 +152,10 @@
 
                                     <WrapPanel >
                                         <TextBlock Text="{Binding Code}" Margin="0 0 5 0" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding StartDate, StringFormat=' Начало: {0:d}', TargetNullValue=''}"
-                               FontSize="12" Foreground="Gray"/>
+                                        <TextBlock Text="{Binding StartDate, StringFormat=' Начало: {0:d}', TargetNullValue='Бессрочный'}"
+                                            FontSize="12" Foreground="Gray"/>
                                         <TextBlock Text="{Binding EndDate, StringFormat=' Окончание: {0:d}', TargetNullValue=''}"
-                               FontSize="12" Foreground="Gray"/>
+                                            FontSize="12" Foreground="Gray"/>
                                     </WrapPanel>
 
                                     <Button Content="Удалить" 
