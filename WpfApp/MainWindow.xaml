@@ -30,6 +30,7 @@
                                 Background="#4CAF50"
                                 Foreground="White"
                                 Margin="10,0,0,0"
+                                IsDefault="True"
                                 Click="ActivatePromocodeButton_Click"/>
                     </StackPanel>
 
@@ -45,23 +46,40 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <ListBox x:Name="ActivePromocodeListBox" FontSize="14">
+                    <ListBox x:Name="ActivePromocodeListBox" Grid.Row="0" HorizontalContentAlignment="Stretch">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <DockPanel Margin="0,2">
-                                    <Button Content="Удалить"
-                                            DockPanel.Dock="Right"
-                                            Background="#f44336"
-                                            Foreground="White"
-                                            Click="DeleteActivePromocodeButton_Click"/>
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Code}" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding StartDate, StringFormat='Начало: {0:d}'}"
-                                                   FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding EndDate, StringFormat='Окончание: {0:d}'}"
-                                                   FontSize="12" Foreground="Gray"/>
+                                <Grid Margin="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+
+                                    <StackPanel Orientation="Horizontal" 
+                            Grid.Column="0"
+                            Margin="10,0,10,0">
+                                        <TextBlock Text="{Binding Code}" 
+                               FontWeight="Bold" 
+                               Grid.Column="0"
+                               HorizontalAlignment="Left"
+                               Margin="0, 0,5,0"/>
+                                        <TextBlock Text="{Binding StartDate, StringFormat='с {0:d}'}" 
+                               FontSize="12" 
+                               Foreground="Gray"/>
+                                        <TextBlock Text="{Binding EndDate, StringFormat=' до {0:d}'}" 
+                               FontSize="12" 
+                               Foreground="Gray"/>
                                     </StackPanel>
-                                </DockPanel>
+
+                                    <Button Content="Удалить" 
+                        Grid.Column="1"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Background="#f44336" 
+                        Foreground="White" 
+                        Click="DeleteActivePromocodeButton_Click"/>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
