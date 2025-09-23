@@ -126,7 +126,9 @@
                             <DatePicker x:Name="EndDatePicker" Width="150"/>
                             
                             <CheckBox x:Name="UnlimitedCheckBox" Content="Бессрочный промокод"
-                                      VerticalAlignment="Center" Margin="0,10,0,0"/>
+                                      VerticalAlignment="Center" Margin="0,10,0,0"
+                                      Checked="UnlimitedCheckBox_Checked"
+                                      Unchecked="UnlimitedCheckBox_Unchecked"/>
                         </StackPanel>
 
                         <Button Content="Добавить промокод"
@@ -159,7 +161,7 @@
                                         <TextBlock Text="{Binding StartDate, StringFormat='с {0:d}'}" 
                                                    FontSize="12" 
                                                    Foreground="Gray"/>
-                                        <TextBlock Text="{Binding EndDate, StringFormat=' до {0:d}'}" 
+                                        <TextBlock x:Name="EndDateTextBlock" Text="{Binding EndDate, StringFormat=' до {0:d}'}" 
                                                    FontSize="12" 
                                                    Foreground="Gray"/>
                                     </StackPanel>

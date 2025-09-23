@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace WpfApp
@@ -37,7 +38,7 @@ namespace WpfApp
         private void UpdateLists()
         {
             ActivePromocodeListBox.ItemsSource = null;
-            ActivePromocodeListBox.ItemsSource = _activePromocodes;
+            ActivePromocodeListBox.ItemsSource = _activePromocodes; 
             ActivePromocodeCountLabel.Text = _activePromocodes.Count.ToString();
 
             InactivePromocodeListBox.ItemsSource = null;
@@ -95,9 +96,9 @@ namespace WpfApp
         {
             string newCode = NewPromocodeTextBox.Text.Trim();
 
-            if (string.IsNullOrEmpty(newCode))
+            if (!Regex.IsMatch(newCode, @"^[A-Za-z0-9]{10}$"))
             {
-                MessageBox.Show("Введите промокод!");
+                MessageBox.Show("Промокод должен содержать только буквы латиницы и цифры (10 символов).");
                 return;
             }
 
@@ -108,16 +109,47 @@ namespace WpfApp
                 return;
             }
 
-            if (!StartDatePicker.SelectedDate.HasValue)
+            DateTime start;
+            DateTime? end;
+
+            if (UnlimitedCheckBox.IsChecked == true)
             {
-                MessageBox.Show("Укажите дату начала!");
+                if (!StartDatePicker.SelectedDate.HasValue)
+                {
+                    MessageBox.Show("Укажите дату начала!");
+                    return;
+                }
+
+                start = StartDatePicker.SelectedDate.Value;
+                end = null;
+            }
+            else if (StartDatePicker.SelectedDate.HasValue && !EndDatePicker.SelectedDate.HasValue)
+            {
+                start = StartDatePicker.SelectedDate.Value;
+                end = null;
+
+            }
+            else if (!StartDatePicker.SelectedDate.HasValue && EndDatePicker.SelectedDate.HasValue)
+            {
+                start = DateTime.Now.Date;
+                end = EndDatePicker.SelectedDate.Value;
+            }
+            else if (StartDatePicker.SelectedDate.HasValue && EndDatePicker.SelectedDate.HasValue)
+            {
+                start = StartDatePicker.SelectedDate.Value;
+                end = EndDatePicker.SelectedDate.Value;
+
+                if (end < start)
+                {
+                    MessageBox.Show("Дата окончания не может быть раньше даты начала!");
+                    return;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Укажите хотя бы одну дату (начало или конец)!");
                 return;
             }
-
-            DateTime start = StartDatePicker.SelectedDate.Value;
-            DateTime end = UnlimitedCheckBox.IsChecked == true
-                ? DateTime.MaxValue
-                : EndDatePicker.SelectedDate ?? start.AddYears(1);
 
             var promo = new Promocode
             {
@@ -136,6 +168,20 @@ namespace WpfApp
             EndDatePicker.SelectedDate = null;
             UnlimitedCheckBox.IsChecked = false;
         }
+
+        private void UnlimitedCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            StartDatePicker.IsEnabled = true;
+            EndDatePicker.IsEnabled = false;
+            EndDatePicker.SelectedDate = null;
+        }
+
+        private void UnlimitedCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            StartDatePicker.IsEnabled = true;
+            EndDatePicker.IsEnabled = true;
+        }
+        
         private void DeleteActivePromocodeButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is Promocode promo)
@@ -144,5 +190,7 @@ namespace WpfApp
                 UpdateLists();
             }
         }
+
+
     }
 }
