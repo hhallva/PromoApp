@@ -64,13 +64,13 @@ namespace WpfApp
                 return;
             }
 
-            if (promo.StartDate > DateTime.Now)
+            if (promo.StartDate.HasValue && promo.StartDate > DateTime.Now)
             {
                 ActivationResultListBox.Items.Add($"Промокод {code} ещё не доступен. Дата начала: {promo.StartDate:d}");
                 return;
             }
 
-            if (promo.EndDate < DateTime.Now)
+            if (promo.EndDate.HasValue && promo.EndDate < DateTime.Now)
             {
                 ActivationResultListBox.Items.Add($"Промокод {code} просрочен. Дата окончания: {promo.EndDate:d}");
                 return;
@@ -84,6 +84,7 @@ namespace WpfApp
             ActivationResultListBox.Items.Add($"Промокод {code} успешно активирован!");
             ActivationPromocodeTextBox.Clear();
         }
+
         private void DeleteInactivePromocodeButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is Promocode promo)
@@ -96,9 +97,9 @@ namespace WpfApp
         {
             string newCode = NewPromocodeTextBox.Text.Trim();
 
-            if (!Regex.IsMatch(newCode, @"^[A-Za-z0-9]{10}$"))
+            if (string.IsNullOrEmpty(newCode))
             {
-                MessageBox.Show("Промокод должен содержать только буквы латиницы и цифры (10 символов).");
+                MessageBox.Show("Введите промокод!");
                 return;
             }
 
@@ -109,30 +110,13 @@ namespace WpfApp
                 return;
             }
 
-            DateTime start;
-            DateTime? end;
+            DateTime? start = null;
+            DateTime? end = null;
 
             if (UnlimitedCheckBox.IsChecked == true)
             {
-                if (!StartDatePicker.SelectedDate.HasValue)
-                {
-                    MessageBox.Show("Укажите дату начала!");
-                    return;
-                }
-
-                start = StartDatePicker.SelectedDate.Value;
+                start = null;
                 end = null;
-            }
-            else if (StartDatePicker.SelectedDate.HasValue && !EndDatePicker.SelectedDate.HasValue)
-            {
-                start = StartDatePicker.SelectedDate.Value;
-                end = null;
-
-            }
-            else if (!StartDatePicker.SelectedDate.HasValue && EndDatePicker.SelectedDate.HasValue)
-            {
-                start = DateTime.Now.Date;
-                end = EndDatePicker.SelectedDate.Value;
             }
             else if (StartDatePicker.SelectedDate.HasValue && EndDatePicker.SelectedDate.HasValue)
             {
@@ -145,9 +129,19 @@ namespace WpfApp
                     return;
                 }
             }
+            else if (StartDatePicker.SelectedDate.HasValue && !EndDatePicker.SelectedDate.HasValue)
+            {
+                start = StartDatePicker.SelectedDate.Value;
+                end = null;
+            }
+            else if (!StartDatePicker.SelectedDate.HasValue && EndDatePicker.SelectedDate.HasValue)
+            {
+                start = DateTime.Now.Date;
+                end = EndDatePicker.SelectedDate.Value;
+            }
             else
             {
-                MessageBox.Show("Укажите хотя бы одну дату (начало или конец)!");
+                MessageBox.Show("Укажите хотя бы одну дату (или выберите 'Бессрочный')");
                 return;
             }
 
@@ -171,8 +165,9 @@ namespace WpfApp
 
         private void UnlimitedCheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            StartDatePicker.IsEnabled = true;
+            StartDatePicker.IsEnabled = false;
             EndDatePicker.IsEnabled = false;
+            StartDatePicker.SelectedDate = null;
             EndDatePicker.SelectedDate = null;
         }
 
@@ -181,7 +176,7 @@ namespace WpfApp
             StartDatePicker.IsEnabled = true;
             EndDatePicker.IsEnabled = true;
         }
-        
+
         private void DeleteActivePromocodeButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is Promocode promo)

@@ -149,22 +149,14 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
-                                   
-                                    <StackPanel Orientation="Horizontal" 
-                                                Grid.Column="0"
-                                                Margin="10,0,10,0">
-                                        <TextBlock Text="{Binding Code}" 
-                                                   FontWeight="Bold" 
-                                                   Grid.Column="0"
-                                                   HorizontalAlignment="Left"
-                                                   Margin="0, 0,5,0"/>
-                                        <TextBlock Text="{Binding StartDate, StringFormat='с {0:d}'}" 
-                                                   FontSize="12" 
-                                                   Foreground="Gray"/>
-                                        <TextBlock x:Name="EndDateTextBlock" Text="{Binding EndDate, StringFormat=' до {0:d}'}" 
-                                                   FontSize="12" 
-                                                   Foreground="Gray"/>
-                                    </StackPanel>
+
+                                    <WrapPanel >
+                                        <TextBlock Text="{Binding Code}" Margin="0 0 5 0" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding StartDate, StringFormat=' Начало: {0:d}', TargetNullValue=''}"
+                               FontSize="12" Foreground="Gray"/>
+                                        <TextBlock Text="{Binding EndDate, StringFormat=' Окончание: {0:d}', TargetNullValue=''}"
+                               FontSize="12" Foreground="Gray"/>
+                                    </WrapPanel>
 
                                     <Button Content="Удалить" 
                                             Grid.Column="1"
