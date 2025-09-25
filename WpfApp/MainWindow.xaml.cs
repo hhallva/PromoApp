@@ -1,4 +1,8 @@
-﻿using System.Text.RegularExpressions;
+﻿using DataLayer.DTOs;
+using DataLayer.Models;
+using DataLayer.Services;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -7,45 +11,31 @@ namespace WpfApp
 
     public partial class MainWindow : Window
     {
-        private List<Promocode> _activePromocodes = new();
-        private List<Promocode> _inactivePromocodes = new();
+        PromocodeService promocodeService = new PromocodeService();
 
+        private List<Promocode> promocodes = new();
         public MainWindow()
         {
             InitializeComponent();
-
-            _inactivePromocodes.Add(new Promocode
-            {
-                Id = 1,
-                Code = "SALE2025",
-                StartDate = DateTime.Now.AddDays(-1),
-                EndDate = DateTime.Now.AddDays(10),
-                IsActive = false
-            });
-
-            _inactivePromocodes.Add(new Promocode
-            {
-                Id = 2,
-                Code = "DISCOUNT",
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(30),
-                IsActive = false
-            });
-
-            UpdateLists();
         }
 
-        private void UpdateLists()
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ActivePromocodeListBox.ItemsSource = null;
-            ActivePromocodeListBox.ItemsSource = _activePromocodes; 
-            ActivePromocodeCountLabel.Text = _activePromocodes.Count.ToString();
-
-            InactivePromocodeListBox.ItemsSource = null;
-            InactivePromocodeListBox.ItemsSource = _inactivePromocodes;
-            InactivePromocodeCountLabel.Text = _inactivePromocodes.Count.ToString();
+            await LoadPromocodes();
         }
-        private void ActivatePromocodeButton_Click(object sender, RoutedEventArgs e)
+
+        private async Task LoadPromocodes()
+        {
+            promocodes = await promocodeService.GetAllAsync();
+            ActivePromocodeListBox.ItemsSource = promocodes.Where(p => !p.IsActive);
+            InactivePromocodeListBox.ItemsSource = promocodes.Where(p => p.IsActive);
+
+            ActivePromocodeCountLabel.Text = promocodes.Count.ToString();
+            InactivePromocodeCountLabel.Text = promocodes.Count.ToString();
+        }
+
+        
+        private async void ActivatePromocodeButton_Click(object sender, RoutedEventArgs e)
         {
             string code = ActivationPromocodeTextBox.Text.Trim();
             ActivationResultListBox.Items.Clear();
@@ -56,7 +46,7 @@ namespace WpfApp
                 return;
             }
 
-            var promo = _inactivePromocodes.Find(p => p.Code == code);
+            var promo = promocodes.Find(p => p.Code == code);
 
             if (promo == null)
             {
@@ -75,25 +65,23 @@ namespace WpfApp
                 ActivationResultListBox.Items.Add($"Промокод {code} просрочен. Дата окончания: {promo.EndDate:d}");
                 return;
             }
+                        
+            await promocodeService.ActivatePromocodeAsync(code);
 
-            _inactivePromocodes.Remove(promo);
-            promo.IsActive = true;
-            _activePromocodes.Add(promo);
-
-            UpdateLists();
+            await LoadPromocodes();
             ActivationResultListBox.Items.Add($"Промокод {code} успешно активирован!");
             ActivationPromocodeTextBox.Clear();
         }
 
-        private void DeleteInactivePromocodeButton_Click(object sender, RoutedEventArgs e)
+        private async void DeleteInactivePromocodeButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is Promocode promo)
             {
-                _inactivePromocodes.Remove(promo);
-                UpdateLists();
+                await promocodeService.DeletePromocodeAsync(promo.Code);
+                await LoadPromocodes();
             }
         }
-        private void AddNewPromocodeButton_Click(object sender, RoutedEventArgs e)
+        private async void AddNewPromocodeButton_Click(object sender, RoutedEventArgs e)
         {
             string newCode = NewPromocodeTextBox.Text.Trim();
 
@@ -103,8 +91,7 @@ namespace WpfApp
                 return;
             }
 
-            if (_inactivePromocodes.Exists(p => p.Code == newCode) ||
-                _activePromocodes.Exists(p => p.Code == newCode))
+            if (promocodes.Exists(p => p.Code == newCode))
             {
                 MessageBox.Show("Такой промокод уже существует!");
                 return;
@@ -145,17 +132,15 @@ namespace WpfApp
                 return;
             }
 
-            var promo = new Promocode
+            var promo = new PostPromocodeDto
             {
-                Id = _inactivePromocodes.Count + _activePromocodes.Count + 1,
                 Code = newCode,
                 StartDate = start,
                 EndDate = end,
-                IsActive = false
             };
 
-            _inactivePromocodes.Add(promo);
-            UpdateLists();
+            await promocodeService.AddPromocodeAsync(promo);
+            await LoadPromocodes();
 
             NewPromocodeTextBox.Clear();
             StartDatePicker.SelectedDate = null;
@@ -177,15 +162,13 @@ namespace WpfApp
             EndDatePicker.IsEnabled = true;
         }
 
-        private void DeleteActivePromocodeButton_Click(object sender, RoutedEventArgs e)
+        private async void DeleteActivePromocodeButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is Promocode promo)
             {
-                _activePromocodes.Remove(promo);
-                UpdateLists();
+                await promocodeService.DeletePromocodeAsync(promo.Code);
+                await LoadPromocodes();
             }
         }
-
-
     }
 }
