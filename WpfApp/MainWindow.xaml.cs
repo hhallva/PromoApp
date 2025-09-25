@@ -30,8 +30,8 @@ namespace WpfApp
             ActivePromocodeListBox.ItemsSource = promocodes.Where(p => !p.IsActive);
             InactivePromocodeListBox.ItemsSource = promocodes.Where(p => p.IsActive);
 
-            ActivePromocodeCountLabel.Text = promocodes.Count.ToString();
-            InactivePromocodeCountLabel.Text = promocodes.Count.ToString();
+            PromocodeCountLabel.Text = promocodes.Count.ToString();
+      
         }
 
         
