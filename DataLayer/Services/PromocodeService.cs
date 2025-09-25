@@ -1,4 +1,5 @@
-﻿using DataLayer.Models;
+﻿using DataLayer.DTOs;
+using DataLayer.Models;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -7,7 +8,7 @@ namespace DataLayer.Services
     public class PromocodeService
     {
         private readonly HttpClient _client;
-        private readonly string _baseUrl = "https://localhost:7016/api/promocodes";
+        private readonly string _baseUrl = "https://localhost:7016/api/promocodes/";
 
         public PromocodeService()
         {
@@ -44,7 +45,7 @@ namespace DataLayer.Services
         }
 
         // POST /api/promocodes
-        public async Task<Promocode> AddPromocodeAsync(Promocode promocode)
+        public async Task<Promocode> AddPromocodeAsync(PostPromocodeDto promocode)
         {
             if (promocode == null)
                 throw new ArgumentNullException(nameof(promocode));
